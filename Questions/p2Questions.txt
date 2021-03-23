@@ -1,0 +1,6 @@
+1. I expect this program to take me 4.5 hours
+2. Thought/design: 2.75 hours
+   Programming: 1.5 hours
+   Debugging: 0.75 hours
+   TOTAL: 5 hours
+3. (5 - 4.5) / 4.5 = 0.11111    I underestimated by about 11%

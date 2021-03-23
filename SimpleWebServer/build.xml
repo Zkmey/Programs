@@ -1,4 +1,4 @@
-<project name="SimpleWebServer" default="compile">
+<project basedir="." name="SimpleWebServer" default="run">
 
     <property name="bin" location="bin/"/>
 	<property name="src"   location="src/"/>
@@ -12,8 +12,9 @@
 		<javac srcdir="${src}" destdir="${bin}"/>
 	</target>
 
-	<target name="run" description="runs program using argument: 8080" depends="clean,compile">
-		<java classname="edu.nmsu.cs.webserver.WebServer" classpath="${bin}">
+	<target name="run" description="runs program using argument: 8080" depends="compile,clean">
+		<java dir="${basedir}/www" fork="true" 
+		classname="edu.nmsu.cs.webserver.WebServer" classpath="${bin}">
 			<arg value="8080"/>
 		</java>
 	</target>

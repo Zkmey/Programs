@@ -30,6 +30,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.io.FileReader;
+import java.io.FileNotFoundException;
 
 public class WebWorker implements Runnable
 {
@@ -121,7 +122,20 @@ public class WebWorker implements Runnable
 	 **/
 	private boolean writeHTTPHeader(OutputStream os, String fileName) throws Exception
 	{
-		String contentType = "text/html"; // hardcoded for this assignment and removed from header
+		String check = fileName.getPath();
+        // we use the path of the file to determine content type
+		// -1 is returned from indexOf() if the string is not found
+		int gif = check.indexOf("gif");
+		int png = check.indexOf("png");
+		int jpeg = check.indexOf("jpeg");
+
+		if(fileName.exists()){
+			if(gif!=-1) contentType = "image/gif";
+			else if(png!=-1) contentType = "image/png";
+			else if(jpeg!=-1) contentType = "image/jpeg";
+			else contentTpye = "text/html"; // if not image type we assume html
+		}
+
 		boolean pageFlag; // flag for determining if file could be found or not
 		Date d = new Date();
 		DateFormat df = DateFormat.getDateTimeInstance();
@@ -166,22 +180,41 @@ public class WebWorker implements Runnable
 	private void writeContent(OutputStream os, String fileName) throws Exception
 	{try{
 
+		String check = fileName.getPath();
+ 
+		int gif = check.indexOf("gif");
+		int png = check.indexOf("png");
+		int jpeg = check.indexOf("jpeg");
+		int html = check.indexOf("html");
+
 		if(fileName.equals("")){  //default HTML message body if no file path provided
 			os.write("<html><head></head><body>\n".getBytes());
 			os.write("<h3>My web server works!</h3>\n".getBytes());
 			os.write("</body></html>\n".getBytes());
-		} else {
+		} else if(html!=-1){  // if content type is html
 			BufferedReader buffRead = new BufferedReader(new FileReader(fileName));
 			String currLine;
 			String currDate = new java.util.Date().toString();
-			if(fileName.endsWith(".html")){
-				for(currLine = buffRead.readLine(); currLine != null; currLine = buffRead.readLine()){
-					// loops through HTML file replacing tags line by line
-					currLine = currLine.replaceAll("<cs371date>", currDate);
-					currLine = currLine.replaceAll("<cs371server>", "Zackery Meyer's CS371 Server");
-					os.write(currLine.getBytes());
-				}
+			for(currLine = buffRead.readLine(); currLine != null; currLine = buffRead.readLine()){
+				// loops through HTML file replacing tags line by line
+				currLine = currLine.replaceAll("<cs371date>", currDate);
+				currLine = currLine.replaceAll("<cs371server>", "Zackery Meyer's CS371 Server");
+				os.write(currLine.getBytes());
 			} 
+		} else if(gif!=-1 || png!=-1 || jpeg!=-1){ // if content is image type
+			// must use input stream for image types
+			try{
+				BufferedInputStream buffStrm = new BufferedInputStream(new FileInputStream(fileName.getAbsolutePath()));
+				// location of bytes for the image
+				int bytes = buffStrm.read();
+				while(bytes!=-1){
+					os.write(bytes);
+					bytes = buffStrm.read();
+				}
+				buffStrm.close();
+			} catch(FileNotFoundException e){
+				System.err.println(e);
+			}
 		}
 
 		}catch(Exception e){
